@@ -1,0 +1,184 @@
+#fig 1, the S-curve
+
+plot( function(x) 1 / (1 + exp(-x)), -6, 6, type = "l", main = "S-curve", ylab = "Concentration of late language", xlab = "Time", cex.lab = 1.7, cex.main = 2, labels = FALSE)
+
+
+#fig 2, the entropy of a binary variable
+
+plot( function(x) x*-1*log2(x) - (1-x)*log2(1-x), 0, 1, type = "l", main = "Entropy of a binary variable", xlab = "Chance (p)", ylab = "Entropy (H)", cex.lab = 1.5, cex.main = 2)
+
+#################################################################
+
+#Figures 3-16
+#makes back to back barplot of a book with frequency of all #early and late variants of a specific book, or synoptic/non #synoptic Chronicles or all core late books together. In this #script, substitute 'XXXX' for any of these names: 'ezek', #'hag', 'zech', 'mal', 'qoh', 'esth', 'dan', 'ezra', 'neh', #'chr', 'ChrN', 'ChrS' or 'core_late_books'. Also, change the #title. You can tweak the labels on the y-axis with #scale_y_continuous().
+
+
+dat <- read.csv("early_late_freqs_per_book.csv", header= T)
+dat.e <- subset(dat, book == 'XXXX')
+dat.e$feature <- as.character(dat.e$feature)
+
+#to preserve order of variables in the figure:
+dat.e$feature <- as.character(dat.e$feature)
+dat.e$feature <- factor(dat.e$feature, levels=unique(dat.e$feature))
+
+
+dat1 <- subset(dat.e,frequency >= 0)
+dat2 <- subset(dat.e,frequency < 0)
+
+bb.plot <- ggplot() + geom_bar(data=dat1, aes(x=feature, y=frequency, fill=factor(early_late)), stat="identity") + geom_bar(data=dat2, aes(x=feature, y=frequency, fill=factor(early_late)), stat="identity") + xlab("Feature") + ylab("Frequency of early vs. late") + ggtitle("Frequency of late variants and early alternatives in XXXX") + theme_bw() + scale_fill_grey(name = "",
+breaks=c("1", "0"), labels=c("Late", "Early"))  +  theme(panel.background = element_rect(fill = 'white', colour = 'red')) + scale_y_continuous(breaks=seq(-500, 500, 50), labels = posit.y) + theme(axis.text.y=element_text(size=16), axis.text.x = element_text(vjust = grid::unit(c(-1.5, 0), "points"), size=13),axis.title=element_text(size=16), legend.text=element_text(size=21), title=element_text(size=16, face="bold"))
+
+
+
+#Figure 17
+
+dat <- read.csv("early_late_per_book.csv", header= T)
+
+dat$book <- as.character(dat$book)
+dat$book <- factor(dat$book, levels=unique(dat$book))
+dat.l <- subset(dat,tokens_per_1000 >= 0)
+dat.e <- subset(dat,tokens_per_1000 < 0)
+
+cap_book <- c("Ezek", "Hag", "Zech", "Mal", "Song", "Qoh", "Esth", "Dan", "Ezra", "Neh", "Chr")
+
+lp <- ggplot() + geom_bar(data = dat.l, aes(x=book, y=tokens_per_1000, fill=factor(early_late)),stat = "identity") + geom_bar(data = dat.e, aes(x=book, y=tokens_per_1000, fill=factor(early_late)), stat = "identity") + xlab('Book') + ylab('Number of early and late tokens per 1000 words') + ggtitle('Distribution of early and late tokens') + theme_bw() + theme(panel.background = element_rect(fill = 'white', colour = 'red')) + scale_y_continuous(breaks=seq(-100, 100, 10), labels = posit.y) +
+scale_fill_grey(labels= c("Early", "Late"), guide = guide_legend(reverse=TRUE), name = "") + scale_x_discrete(labels=cap_book) + theme(axis.text=element_text(size=16),axis.title=element_text(size=16), legend.text=element_text(size=21), title=element_text(size=23, face="bold"))
+
+########################################################
+
+#Figures 18-31
+#Makes plot with fraction of late features for each book, #synoptic or non-synoptic Chronicles, or all core late books #together.
+#In this script, substitute 'XXXX' for any of these names: #'ezek', 'hag', 'zech', 'mal', 'qoh', 'esth', 'dan', 'ezra', #'neh', 'chr', 'ChrN', 'ChrS' or 'core_late_books'. Also, change #the title. 
+
+dat <- read.csv("relative_per_book.csv", header= T)
+dat.e <- subset(dat, book == 'XXXX')
+
+
+# order from high to low values
+dat.e <- dat.e[with(dat.e, order(-frequency, feature)), ]
+
+#to preserve order of features in picture:
+dat.e$feature <- as.character(dat.e$feature)
+dat.e$feature <- factor(dat.e$feature, levels=unique(dat.e$feature))
+
+late.frac <- ggplot() + geom_bar(data=dat.e, aes(x=feature, y=frequency), stat="identity") + xlab("Feature") + ylab("Late fraction") + ggtitle("Fraction of late tokens in Esther, Daniel, Ezra, Nehemiah, and Chronicles") + theme_bw() +  theme(panel.grid.major = element_line(colour = "grey"), axis.text.y=element_text(size=16), axis.text.x = element_text(vjust = grid::unit(c(-1.5, 0), "points"), size = 14),axis.title=element_text(size=16), legend.text=element_text(size=21), title=element_text(size=23, face="bold")) + ylim(0, 1)
+
+#################################################################
+
+#Figures 32-43
+#Makes diffusion plot for separate books or all TBH/LBH books #together.
+#In this script, substitute 'XXXX' for any of these names: #'ezek', 'hag', 'zech', 'mal', 'song', 'qoh', 'esth', 'dan', #'ezra', 'neh', 'chr', 'all_tbh_lbh'. Also, change the title. 
+#In some cases, you may need to adapt the values in #scale_y_continuous().
+
+dat1 <- read.csv("relationships_between_books_early_lat.csv")
+
+dat1 <- subset(dat1, book == "XXXX")
+melt.dat1 <- melt(dat1 , id=c("book", "early_late"))
+
+diffu <- ggplot(melt.dat1, aes(x=variable, y=value, group = early_late)) + geom_point(aes(colour=early_late), size=4) + stat_smooth(se = FALSE , aes(colour = factor(early_late)), size=2) + scale_colour_grey(labels= c("Early", "Late")) + theme_bw() + scale_y_continuous(breaks=seq(0, 30, 5)) + xlab("Number of books in which an item occurs") + ylab("Frequency") + ggtitle("Diffusion of late variants and early alternatives in XXXX")  + theme(legend.title=element_blank()) + scale_x_discrete(labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")) + theme(axis.text=element_text(size=16),axis.title=element_text(size=16), legend.text=element_text(size=21), title=element_text(size=23, face="bold"))
+
+
+#################################################################
+
+#Figure 44
+#The Venn diagram of core late books
+
+library(VennDiagram)
+
+venn.plot <- draw.quintuple.venn(
+area1 = 27,
+area2 = 10,
+area3 = 24,
+area4 = 28,
+area5 = 47,
+n12 = 6,
+n13 = 8,
+n14 = 9,
+n15 = 11,
+n23 = 4,
+n24 = 6,
+n25 = 8,
+n34 = 11,
+n35 = 17,
+n45 = 16,
+n123 = 3,
+n124 = 5,
+n125 = 5,
+n134 = 3,
+n135 = 5,
+n145 = 5,
+n234 = 3,
+n235 = 4,
+n245 = 4,
+n345 = 9,
+n1234 = 3,
+n1235 = 3,
+n1245 = 4,
+n1345 = 3,
+n2345 = 3,
+n12345 = 3,
+category = c("Esther", "Daniel", "Ezra", "Nehemiah", "Chronicles"),
+fill = c("dodgerblue", "goldenrod1", "darkorange1", "seagreen3", "orchid3"),
+cat.col = c("dodgerblue", "goldenrod1", "darkorange1", "seagreen3", "orchid3"),
+cat.cex = 2,
+cat.just = list(c(0, 0), c(0, -2), c(0, 0), c(0, 0), c(2,-2.5)),
+margin = 0.05,
+cex = c(1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5,
+1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5),
+ind = TRUE
+)
+
+#################################################################
+
+#Figures 45 and 46
+#entropy dotplots
+
+dat <- read.csv("entropy_replacement.csv", header= T)
+cap_book <- c("Ezek", "Hag", "Zech", "Mal", "Song", "Qoh", "Esth", "Dan", "Ezra", "Neh", "Chr")
+
+#per type
+entr.type <- ggplot(dat, aes(x=replacement_type, y=entropy_type, group = book)) + geom_point() + geom_text(aes(label=cap_book),hjust=(ifelse(dat$book == "mal", 0.1, -0.2)), vjust=(ifelse(dat$book == "mal", -0.3, (ifelse(dat$book == "zech", -0.8, 0))))) + theme_bw() + ggtitle("Entropy vs. replacement in TBH and LBH books with the same weight for each type") + xlab("Rate of replacement") + ylab("Average entropy") + xlim(c(0,1)) + ylim(c(0,1)) + geom_rect(aes(NULL, NULL, xmin = 0, xmax = 0.25), ymin = 0, ymax = 0.5, fill = "lightblue", alpha = 0.05) + geom_rect(aes(NULL, NULL, xmin = 0.25, xmax = 0.75), ymin = 0.25, ymax = 1, fill = "red", alpha = 0.05) + geom_rect(aes(NULL, NULL, xmin = 0.75, xmax = 1), ymin = 0, ymax = 0.5, fill = "lightblue", alpha = 0.05) + geom_text(aes(0.12, 0.3, label="Projected CBH")) + geom_text(aes(0.5, 0.8, label="Projected TBH"))+ geom_text(aes(0.87, 0.3, label="Projected LBH")) +  theme(axis.text.y=element_text(size=16), axis.text.x = element_text(size = 14),axis.title=element_text(size=16),title=element_text(size=20, face="bold"))
+
+#per token 
+entr.tok <- ggplot(dat, aes(x=replacement_token, y=entropy_token, group = book)) + geom_point() + geom_text(aes(label=cap_book),hjust=(ifelse(dat$book == "hag", 0.3, -0.2)), vjust=(ifelse(dat$book == "mal", 1, (ifelse(dat$book == "hag", -0.6, (ifelse(dat$book == "neh", -0.6, 0))))))) + theme_bw() + ggtitle("Entropy vs. replacement in TBH and LBH books with the same weight for each token") + xlab("Rate of replacement") + ylab("Average entropy") + xlim(c(0,1)) + ylim(c(0,1)) + geom_rect(aes(NULL, NULL, xmin = 0, xmax =  0.25), ymin = 0, ymax = 0.5, fill = "lightblue", alpha = 0.05) + geom_rect(aes(NULL, NULL, xmin = 0.25, xmax = 0.75), ymin = 0.25, ymax = 1, fill = "red", alpha = 0.05) + geom_rect(aes(NULL, NULL, xmin = 0.75, xmax = 1), ymin = 0, ymax = 0.5, fill = "lightblue", alpha = 0.05) + geom_text(aes(0.12, 0.3, label="Projected CBH")) + geom_text(aes(0.5, 0.8, label="Projected TBH"))+ geom_text(aes(0.87, 0.3, label="Projected LBH")) +  theme(axis.text.y=element_text(size=16), axis.text.x = element_text(size = 14),axis.title=element_text(size=16),title=element_text(size=20, face="bold"))
+
+##################################################################Spanish stuff
+
+dat <- read.csv("spanish_words2.csv")
+
+#figure 47
+
+dat1 <- subset(dat, meaning == "tailor")
+melt.dat1 <- melt(dat1 , id=c("word", "meaning"))
+
+sp.tailor <- ggplot(melt.dat1, aes(x=variable, y=value, group = word)) + geom_point(aes(colour=word), size=4) + geom_line(aes(colour = factor(word)), size=2) + scale_colour_grey(labels= c("alfayate(s)", "sastre(s)")) + theme_bw() + scale_y_continuous(breaks=seq(0, 30, 5)) + xlab("Time") + ylab("Frequency per 1,000,000 words") + ggtitle('"Tailor" in Spanish') + scale_x_discrete(labels=c("1200s", "1300s", "1400s", "1500s", "1600s", "1700s", "1800s", "1900s")) + theme(legend.title=element_blank(), axis.text.y=element_text(size=16), axis.text.x = element_text(size = 14),axis.title=element_text(size=16),title=element_text(size=20, face="bold"), legend.text=element_text(size=21)) 
+
+
+#Figure 48
+
+dat2 <- subset(dat, meaning == "man")
+melt.dat2 <- melt(dat2 , id=c("word", "meaning"))
+
+sp.man <- ggplot(melt.dat2, aes(x=variable, y=value, group = word)) + geom_point(aes(colour=word), size=4) + geom_line(aes(colour = factor(word)), size=2) + scale_colour_grey(labels= c("omne(s)", "hombre(s)")) + 
+theme_bw() + scale_y_continuous(breaks=seq(0, 3000, 500)) + xlab("Time") + ylab("Frequency per 1,000,000 words") + ggtitle('"Man" in Spanish') + scale_x_discrete(labels=c("1200s", "1300s", "1400s", "1500s", "1600s", "1700s", "1800s", "1900s")) + theme(legend.title=element_blank(), axis.text.y=element_text(size=16), axis.text.x = element_text(size = 14),axis.title=element_text(size=16),title=element_text(size=20, face="bold"), legend.text=element_text(size=21)) 
+
+
+#################################################################
+
+#Figure 49
+#frequencies of all late and early features in all 11 
+#books. Order: high to low frequency of late variant
+
+dat <- read.csv("freq_all_features.csv")
+dat.late <- subset(dat, early_late == '1')
+dat.early <- subset(dat, early_late == '0')
+dat.late$freq_early <- dat.early$frequency
+dat.late$early_lat <- dat.early$early_late
+dat.late <- dat.late[with(dat.late, order(-frequency)), ]
+
+#to preserve order of features in picture:
+dat.late$feature <- as.character(dat.late$feature)
+dat.late$feature <- factor(dat.late$feature, levels=unique(dat.late$feature))
+
+freq.all <- ggplot() + geom_bar(data = dat.late, aes(x=feature, y=frequency, fill=factor(early_late)), stat='identity') + geom_bar(data=dat.late, aes(x=feature, y=-freq_early, fill=factor(early_lat)), stat='identity') + ggtitle('Frequency of late variants and early alternatives in the corpus of TBH and LBH books ') + xlab('Feature') + ylab('Frequency') + theme_bw() + theme(panel.grid.major = element_line(colour = "grey")) + scale_fill_grey(guide = guide_legend(reverse=TRUE), name = "", labels = c("Early", "Late")) + scale_y_continuous(breaks=seq(-700, 300, 50), labels = posit.y) + theme(axis.text.y=element_text(size=16), axis.text.x = element_text(vjust = grid::unit(c(-1.5, 0), "points"), size=13),axis.title=element_text(size=16), legend.text=element_text(size=21), title=element_text(size=17, face="bold"))
+

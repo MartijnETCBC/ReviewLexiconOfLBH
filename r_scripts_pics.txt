@@ -7,7 +7,11 @@ plot( function(x) 1 / (1 + exp(-x)), -6, 6, type = "l", main = "S-curve", ylab =
 
 plot( function(x) x*-1*log2(x) - (1-x)*log2(1-x), 0, 1, type = "l", main = "Entropy of a binary variable", xlab = "Chance (p)", ylab = "Entropy (H)", cex.lab = 1.5, cex.main = 2)
 
-#################################################################
+################################################################
+
+library(ggplot2)
+library(reshape)
+
 
 #Figures 3-16
 #makes back to back barplot of a book with frequency of all #early and late variants of a specific book, or synoptic/non #synoptic Chronicles or all core late books together. In this #script, substitute 'XXXX' for any of these names: 'ezek', #'hag', 'zech', 'mal', 'qoh', 'esth', 'dan', 'ezra', 'neh', #'chr', 'ChrN', 'ChrS' or 'core_late_books'. Also, change the #title. You can tweak the labels on the y-axis with #scale_y_continuous().

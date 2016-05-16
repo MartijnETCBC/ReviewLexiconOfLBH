@@ -19,7 +19,7 @@ The repository contains the following files and scripts:
 
 The article is based on the data in LexiconHurvitzDataset.csv, which you can also find at DANS: http://dx.doi.org/10.17026/dans-256-4hcy
 The columns in the dataset are explained in the article (pp. 4-5).
-In the article two figures (47 and 48) are based on the file spanish_words.csv.
+In the article two figures (47 and 48) are based on the file spanish_words.csv. The data in this file are extracted from the Corpus del Espagnol (www.corpusdelespagnol.org).
 
 The file preprocess_lexicon_lbh.ipynb consists of a number of Python scripts having LexiconHurvitzDataset.csv as input and some
 new files as output. These output files are the input of the R-scripts in r_scripts_pics.txt, with which the figures in the articles were made.
